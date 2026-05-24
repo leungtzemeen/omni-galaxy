@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.omnigalaxy</groupId>
+        <artifactId>platform-user</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+    <artifactId>platform-user-biz</artifactId>
+    <name>platform-user-biz</name>
+    <description>OmniGalaxy 用户中心核心业务运行进程</description>
+    <dependencies>
+        <!-- 引入自己对应的 API 契约包 -->
+        <dependency>
+            <groupId>com.omnigalaxy</groupId>
+            <artifactId>platform-user-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <!-- 引入底座专用的三大核心工具包（未来直接引用，现在先占坑） -->
+        <dependency>
+            <groupId>com.omnigalaxy</groupId>
+            <artifactId>common-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <!--
+        需要运行 web 死守“单模块独立可跑”的健壮性原则：
+        1. 如果 user-biz 不显式写 Web 依赖，它就相当于把自己的命脉强行绑架在了 common-core 身上。
+        万一对项目进行重构，发现 common-core 体积太臃肿了，决定把 Web 依赖从 common-core 里剥离出去
+        （让 core 变成一个纯粹的、连 Tomcat 都不带的原子类工具包），那么在剥离的那一瞬间，全宇宙所有依赖
+        core 的微服务（用户、认证、电商、AI）会集体瞬间崩溃报红，因为它们全部丢失了 Web 属性。
+        2. 规范定义：任何可以独立启动的进程（具有 *Application.java 的模块），其核心底层驱动组件
+        （如 Web 容器、数据库驱动）必须在自己的 pom 里显式宣示主权。这叫“显式依赖，防御重构”。
+        3. common-core 引入 Web：是为了让它内部的公共工具（如全局异常拦截器 @RestControllerAdvice、
+        统一返回体序列化）能够顺利编译。它提供的是“组件包”。
+        4. user-biz 引入 Web：是为了让自己能拉起 Tomcat 容器、暴露出 8080 端口，去真正承接前端的 HTTP 请求。
+        它提供的是“运行环境”。
+        5. 一个是工具，一个是宿主，两者各司其职。
+        6. 未来如果要重构 common-core 的依赖结构，或者调整微服务的模块划分，只要遵守“单模块独立可跑”和“显式依赖，
+        防御重构”的原则，就能最大程度地降低耦合风险，保证系统的健壮性和可维护性。
+        -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+    </dependencies>
+</project>

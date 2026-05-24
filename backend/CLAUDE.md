@@ -32,7 +32,16 @@ This file provides strict guidance and behavioral rules for Claude Code (claude.
 
 ---
 
-## 3. 常用开发命令集 (Build & Test Commands - Git Bash Env)
+## 3. Maven 依赖边界与防污染机制（最高硬性红线）
+- **严禁版本号冗余**：子模块在引入任何被顶级根 POM 的 `<dependencyManagement>` 仲裁过的依赖时（如 Spring Boot 全家桶、Spring Cloud 组件、Spring Cloud Alibaba、MyBatis-Plus、Lombok、MapStruct），**必须绝对禁止编写 `<version>` 标签**。版本必须无条件服从顶级根 POM 的法律约束。
+- **严禁子模块依赖污染**：
+  - 针对 `xxx-api` 模块（对外二方包）：只允许引入最基础的 `spring-cloud-starter-openfeign`。**严禁**引入 `spring-boot-starter-web`、MyBatis-Plus、MySQL驱动、Redis驱动等任何带有运行期数据库或重型组件的依赖。确保 API 包极度轻量、零污染。
+  - 针对 `common-core` / `common-utils` 等基础组件：**严禁**引入带有特定具体业务倾向的依赖，保持纯工具属性。
+- **单模块独立可跑**：任何独立启动运行的微服务进程（如 `xxx-biz` 模块），其所需的依赖必须在自身模块的 `pom.xml` 中清晰、精确地按需声明，严禁在顶级 POM 中强制全员继承无关运行期组件。
+
+---
+
+## 4. 常用开发命令集 (Build & Test Commands - Git Bash Env)
 
 All commands must be compatible with the **Git Bash** environment.
 

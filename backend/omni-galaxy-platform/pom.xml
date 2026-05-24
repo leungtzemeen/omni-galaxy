@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.omnigalaxy</groupId>
+        <artifactId>omni-galaxy</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath> <!-- 指向最外层顶级POM -->
+    </parent>
+
+    <artifactId>omni-galaxy-platform</artifactId>
+    <packaging>pom</packaging>
+
+    <name>omni-galaxy-platform</name>
+    <description>OmniGalaxy 核心数字底座平台二级父POM</description>
+
+    <properties>
+        <maven.compiler.source>${java.version}</maven.compiler.source>
+        <maven.compiler.target>${java.version}</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <!-- 微服务聚合声明 -->
+    <modules>
+        <module>platform-gateway</module>
+        <module>platform-auth</module>
+        <module>platform-user</module>
+    </modules>
+</project>
