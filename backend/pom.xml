@@ -23,7 +23,7 @@
         <spring-cloud.version>2023.0.3</spring-cloud.version>
         <spring-cloud-alibaba.version>2023.0.3.2</spring-cloud-alibaba.version>
         <mybatis-plus.version>3.5.10.1</mybatis-plus.version>
-        <lombok.version>1.18.36</lombok.version>
+        <lombok.version>1.18.38</lombok.version>
         <mapstruct.version>1.6.3</mapstruct.version>
     </properties>
 
@@ -66,6 +66,11 @@
             <dependency>
                 <groupId>com.baomidou</groupId>
                 <artifactId>mybatis-plus-spring-boot3-starter</artifactId>
+                <version>${mybatis-plus.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.baomidou</groupId>
+                <artifactId>mybatis-plus-jsqlparser</artifactId>
                 <version>${mybatis-plus.version}</version>
             </dependency>
         </dependencies>
