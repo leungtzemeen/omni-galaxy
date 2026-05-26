@@ -12,6 +12,12 @@
     <name>common-mybatis</name>
     <description>OmniGalaxy 数据库分页、多租户、自动填充通用组件</description>
     <dependencies>
+        <!-- 引入 common-core：获取 UserContext 用户上下文，驱动审计字段自动填充 -->
+        <dependency>
+            <groupId>com.omnigalaxy</groupId>
+            <artifactId>common-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <!-- 引入 MyBatis-Plus 依赖（版本无条件服从顶级 POM 字典仲裁） -->
         <dependency>
             <groupId>com.baomidou</groupId>

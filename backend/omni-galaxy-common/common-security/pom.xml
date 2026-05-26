@@ -11,4 +11,25 @@
     <artifactId>common-security</artifactId>
     <name>common-security</name>
     <description>OmniGalaxy 安全认证与权限拦截通用组件</description>
+
+    <dependencies>
+        <!-- 引入 common-core：获取 LoginUser/UserContext、BizException、ResultCodeEnum -->
+        <dependency>
+            <groupId>com.omnigalaxy</groupId>
+            <artifactId>common-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <!-- Spring MVC：提供 HandlerInterceptor、WebMvcConfigurer、HandlerMethod 等核心 API -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <!-- Spring Boot 自动装配基础设施：@AutoConfiguration、@ConditionalOnWebApplication 等 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-autoconfigure</artifactId>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
 </project>
