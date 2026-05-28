@@ -27,5 +27,6 @@
         <module>platform-gateway</module>
         <module>platform-auth</module>
         <module>platform-user</module>
+        <module>platform-permission</module>
     </modules>
 </project>
