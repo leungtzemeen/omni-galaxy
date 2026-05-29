@@ -9,12 +9,12 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>platform-auth</artifactId>
+    <packaging>pom</packaging>
     <name>platform-auth</name>
-    <description>OmniGalaxy SSO 单点登录统一认证中心进程</description>
-    <dependencies>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-        </dependency>
-    </dependencies>
+    <description>OmniGalaxy SSO 单点登录统一认证中心父管理POM</description>
+
+    <modules>
+        <module>platform-auth-api</module>
+        <module>platform-auth-biz</module>
+    </modules>
 </project>

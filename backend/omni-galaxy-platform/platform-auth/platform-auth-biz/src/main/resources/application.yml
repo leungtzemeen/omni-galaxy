@@ -1,0 +1,50 @@
+server:
+  port: 9100
+
+spring:
+  application:
+    name: platform-auth
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      database: 0
+      timeout: 3000ms
+  # Feign 在 Phase 2 接入服务发现前禁用自动注册，避免找不到 Nacos 而启动失败
+  cloud:
+    nacos:
+      discovery:
+        enabled: false
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+knife4j:
+  enable: true
+  openapi:
+    title: OmniGalaxy 认证中心 API
+    description: SSO 登录、注册、验证码接口文档（PHONE/EMAIL/PASSWORD/WECHAT）
+    version: v1.0.0
+    group:
+      default:
+        group-name: 认证中心
+        api-rule: package
+        api-rule-resources:
+          - com.omnigalaxy.platform.auth.controller
+
+omni-galaxy:
+  security:
+    whitelist:
+      - /auth/**
+      - /doc.html
+      - /v3/api-docs/**
+      - /swagger-ui/**
+      - /webjars/**
+  jwt:
+    # ⚠️  开发占位密钥，生产环境必须通过 JWT_SECRET 环境变量注入
+    # 生成命令：openssl rand -base64 64
+    secret: ${JWT_SECRET:ZGV2LW9ubGktc2VjcmV0LWtleS10aGF0LXNob3VsZC1iZS1jaGFuZ2Vk}
+    expire-ms: 86400000

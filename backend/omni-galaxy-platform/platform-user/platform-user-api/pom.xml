@@ -17,5 +17,11 @@
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-openfeign</artifactId>
         </dependency>
+        <!-- Result 统一响应体 -->
+        <dependency>
+            <groupId>com.omnigalaxy</groupId>
+            <artifactId>common-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 </project>

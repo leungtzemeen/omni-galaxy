@@ -2,33 +2,26 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
     <parent>
         <groupId>com.omnigalaxy</groupId>
-        <artifactId>omni-galaxy-common</artifactId>
+        <artifactId>platform-auth</artifactId>
         <version>1.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
-
-    <artifactId>common-captcha</artifactId>
-    <name>common-captcha</name>
-    <description>OmniGalaxy 人机验证码组件（策略模式支持国内滑块、国外reCAPTCHA）</description>
-
+    <artifactId>platform-auth-api</artifactId>
+    <name>platform-auth-api</name>
+    <description>OmniGalaxy 认证中心对外 Feign 契约与 DTO 传输包</description>
     <dependencies>
+        <!-- 只允许引入微服务间调用必备的 Feign 声明组件 -->
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-redis</artifactId>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-openfeign</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-autoconfigure</artifactId>
-            <optional>true</optional>
-        </dependency>
+        <!-- Result 统一响应体 -->
         <dependency>
             <groupId>com.omnigalaxy</groupId>
             <artifactId>common-core</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>
-
 </project>
