@@ -14,7 +14,7 @@ import java.lang.annotation.Target;
 @Documented
 public @interface PasswordStrength {
 
-    String message() default "password must be 8-20 characters and contain both uppercase, lowercase, and digits";
+    String message() default "{validation.password.strength}";
 
     Class<?>[] groups() default {};
 

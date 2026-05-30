@@ -4,6 +4,7 @@ import com.omnigalaxy.common.captcha.enums.OtpScene;
 import com.omnigalaxy.common.captcha.manager.OtpManager;
 import com.omnigalaxy.common.captcha.sender.CaptchaSender;
 import com.omnigalaxy.common.core.exception.BizException;
+import com.omnigalaxy.platform.auth.api.result.AuthResultCodeEnum;
 import com.omnigalaxy.platform.auth.dto.SendCodeRequest;
 import com.omnigalaxy.platform.auth.service.AuthCodeService;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +32,7 @@ public class AuthCodeServiceImpl implements AuthCodeService {
         try {
             return OtpScene.valueOf(scene.toUpperCase());
         } catch (IllegalArgumentException e) {
-            throw new BizException("不支持的验证码场景: " + scene);
+            throw new BizException(AuthResultCodeEnum.OTP_SCENE_UNSUPPORTED);
         }
     }
 }

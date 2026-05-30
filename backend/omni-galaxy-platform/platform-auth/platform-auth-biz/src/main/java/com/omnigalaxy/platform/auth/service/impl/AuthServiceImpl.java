@@ -4,6 +4,7 @@ import com.omnigalaxy.common.captcha.enums.OtpScene;
 import com.omnigalaxy.common.captcha.manager.OtpManager;
 import com.omnigalaxy.common.core.exception.BizException;
 import com.omnigalaxy.platform.auth.api.dto.LoginResponse;
+import com.omnigalaxy.platform.auth.api.result.AuthResultCodeEnum;
 import com.omnigalaxy.platform.auth.dto.OtpLoginRequest;
 import com.omnigalaxy.platform.auth.dto.PasswordLoginRequest;
 import com.omnigalaxy.platform.auth.service.AuthService;
@@ -31,7 +32,7 @@ public class AuthServiceImpl implements AuthService {
 
         boolean valid = otpManager.verify(OtpScene.LOGIN, identityType, identifier, request.getOtpCode());
         if (!valid) {
-            throw new BizException("验证码错误或已过期，请重新获取");
+            throw new BizException(AuthResultCodeEnum.OTP_INVALID);
         }
 
         // TODO Phase 2: 查 user_credential，若不存在则调 UserProfileClient 创建档案后写入凭证（一键登注）
@@ -47,6 +48,6 @@ public class AuthServiceImpl implements AuthService {
     public LoginResponse loginByPassword(PasswordLoginRequest request) {
         // TODO Phase 2: 查 user_credential（loginType=PASSWORD），验证账号是否存在
         // TODO Phase 2: 用 BCrypt 校验密码，支持重试限制与账号临时锁定
-        throw new BizException("密码登录功能待 Phase 2 实现");
+        throw new BizException(AuthResultCodeEnum.PASSWORD_LOGIN_NOT_IMPL);
     }
 }

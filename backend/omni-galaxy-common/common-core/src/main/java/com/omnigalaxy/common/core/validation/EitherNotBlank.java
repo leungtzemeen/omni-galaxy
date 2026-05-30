@@ -14,7 +14,7 @@ import java.lang.annotation.Target;
 @Documented
 public @interface EitherNotBlank {
 
-    String message() default "exactly one of the specified fields must be non-blank";
+    String message() default "{validation.either.notBlank}";
 
     Class<?>[] groups() default {};
 

@@ -15,7 +15,8 @@ public enum ResultCodeEnum implements IResultCode {
     FAILED(500, "系统未知异常"),
     VALIDATE_FAILED(400, "参数校验失败"),
     UNAUTHORIZED(401, "请先登录"),
-    FORBIDDEN(403, "无访问权限，请联系管理员授权");
+    FORBIDDEN(403, "无访问权限，请联系管理员授权"),
+    TOO_MANY_REQUESTS(429, "发送过于频繁，请稍后再试");
 
     private final int code;
     private final String msg;

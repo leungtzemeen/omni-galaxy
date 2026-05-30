@@ -2,6 +2,7 @@ package com.omnigalaxy.common.captcha.manager;
 
 import com.omnigalaxy.common.captcha.enums.OtpScene;
 import com.omnigalaxy.common.core.exception.BizException;
+import com.omnigalaxy.common.core.result.ResultCodeEnum;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -33,7 +34,7 @@ public class RedisOtpManager implements OtpManager {
     @Override
     public String generateAndStore(OtpScene scene, String identityType, String identifier) {
         if (isOnCooldown(identityType, identifier)) {
-            throw new BizException("验证码发送过于频繁，请 1 分钟后再试");
+            throw new BizException(ResultCodeEnum.TOO_MANY_REQUESTS);
         }
         String code = String.format("%06d", ThreadLocalRandom.current().nextInt(1_000_000));
         redisTemplate.opsForValue().set(otpKey(scene, identityType, identifier), code, OTP_TTL_SECONDS, TimeUnit.SECONDS);

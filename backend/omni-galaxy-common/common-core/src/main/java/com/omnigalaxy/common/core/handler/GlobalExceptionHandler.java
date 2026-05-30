@@ -4,7 +4,10 @@ import com.omnigalaxy.common.core.exception.BizException;
 import com.omnigalaxy.common.core.result.Result;
 import com.omnigalaxy.common.core.result.ResultCodeEnum;
 import jakarta.validation.ConstraintViolationException;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -18,20 +21,27 @@ import java.util.stream.Collectors;
  *
  * <p>拦截优先级（由精确到兜底）：
  * <ol>
- *   <li>{@link BizException} — 预期内业务异常，提取 code + msg 直接响应</li>
+ *   <li>{@link BizException} — 预期内业务异常，反向桥接 MessageSource 解析多语言 msg</li>
  *   <li>{@link MethodArgumentNotValidException} — @RequestBody 参数校验失败（400）</li>
  *   <li>{@link ConstraintViolationException} — @RequestParam/@PathVariable 参数校验失败（400）</li>
  *   <li>{@link Exception} — 预期外系统异常，统一返回 500 并完整记录堆栈</li>
  * </ol>
+ *
+ * <p>反向桥接策略：以 {@code "code." + resultCode.name()} 为 key 查询 MessageSource，
+ * 若 key 未配置则直接使用枚举自带的中文 msg 兜底，枚举本身无需任何改动。
  */
 @Slf4j
 @RestControllerAdvice
+@RequiredArgsConstructor
 public class GlobalExceptionHandler {
+
+    private final MessageSource messageSource;
 
     @ExceptionHandler(BizException.class)
     public Result<Void> handleBizException(BizException e) {
-        log.warn(">>>> [核心底座] 业务异常已拦截，预期内（不影响系统稳定性）: {}", e.getMessage());
-        return Result.failed(e.getResultCode().getCode(), e.getMessage());
+        String msg = resolveMessage(e);
+        log.warn(">>>> [核心底座] 业务异常已拦截，预期内（不影响系统稳定性）: {}", msg);
+        return Result.failed(e.getResultCode().getCode(), msg);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -54,5 +64,25 @@ public class GlobalExceptionHandler {
     public Result<Void> handleException(Exception e) {
         log.error(">>>> [核心底座] 严重崩溃，未知系统异常，需立即排查", e);
         return Result.failed(ResultCodeEnum.FAILED);
+    }
+
+    // -------------------------------------------------------------------------
+
+    /**
+     * 反向桥接：以 "code.{enum.name()}" 为 key 查 MessageSource。
+     * 枚举实现了 name()（如 ResultCodeEnum）时走多语言解析；
+     * 裸字符串构造的 BizException（resultCode = FAILED）直接用 exception 自带 message。
+     */
+    private String resolveMessage(BizException e) {
+        String enumName = e.getResultCode().getClass().isEnum()
+                ? ((Enum<?>) e.getResultCode()).name()
+                : null;
+        if (enumName != null) {
+            String key = "code." + enumName;
+            String resolved = messageSource.getMessage(
+                    key, null, e.getResultCode().getMsg(), LocaleContextHolder.getLocale());
+            return resolved;
+        }
+        return e.getMessage();
     }
 }

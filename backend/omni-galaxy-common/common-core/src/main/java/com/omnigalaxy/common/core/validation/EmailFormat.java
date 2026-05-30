@@ -14,7 +14,7 @@ import java.lang.annotation.Target;
 @Documented
 public @interface EmailFormat {
 
-    String message() default "email must be a valid email address";
+    String message() default "{validation.email.format}";
 
     Class<?>[] groups() default {};
 

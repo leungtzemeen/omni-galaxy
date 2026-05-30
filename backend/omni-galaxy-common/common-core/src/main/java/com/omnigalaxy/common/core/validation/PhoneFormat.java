@@ -14,7 +14,7 @@ import java.lang.annotation.Target;
 @Documented
 public @interface PhoneFormat {
 
-    String message() default "phone must be in E.164 format (e.g., +86 13800138000)";
+    String message() default "{validation.phone.format}";
 
     Class<?>[] groups() default {};
 

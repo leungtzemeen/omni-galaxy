@@ -12,7 +12,7 @@ import java.lang.annotation.Target;
 @Constraint(validatedBy = IdentifierMatchesTypeValidator.class)
 public @interface IdentifierMatchesType {
 
-    String message() default "identifier format must match identityType (PHONE must be E.164, EMAIL must be valid email)";
+    String message() default "{validation.identifier.matchesType}";
 
     Class<?>[] groups() default {};
 
