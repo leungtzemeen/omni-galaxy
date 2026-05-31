@@ -32,7 +32,7 @@ public class AuthCodeServiceImpl implements AuthCodeService {
         try {
             return OtpScene.valueOf(scene.toUpperCase());
         } catch (IllegalArgumentException e) {
-            throw new BizException(AuthResultCodeEnum.OTP_SCENE_UNSUPPORTED);
+            throw new BizException(AuthResultCodeEnum.OTP_SCENE_UNSUPPORTED, scene);
         }
     }
 }

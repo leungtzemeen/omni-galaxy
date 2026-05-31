@@ -34,7 +34,7 @@ public class RedisOtpManager implements OtpManager {
     @Override
     public String generateAndStore(OtpScene scene, String identityType, String identifier) {
         if (isOnCooldown(identityType, identifier)) {
-            throw new BizException(ResultCodeEnum.TOO_MANY_REQUESTS);
+            throw new BizException(ResultCodeEnum.TOO_MANY_REQUESTS, COOLDOWN_TTL_SECONDS / 60);
         }
         String code = String.format("%06d", ThreadLocalRandom.current().nextInt(1_000_000));
         redisTemplate.opsForValue().set(otpKey(scene, identityType, identifier), code, OTP_TTL_SECONDS, TimeUnit.SECONDS);

@@ -80,7 +80,7 @@ public class GlobalExceptionHandler {
         if (enumName != null) {
             String key = "code." + enumName;
             String resolved = messageSource.getMessage(
-                    key, null, e.getResultCode().getMsg(), LocaleContextHolder.getLocale());
+                    key, e.getArgs(), e.getResultCode().getMsg(), LocaleContextHolder.getLocale());
             return resolved;
         }
         return e.getMessage();
