@@ -1,6 +1,7 @@
 package com.omnigalaxy.common.core.handler;
 
 import com.omnigalaxy.common.core.exception.BizException;
+import com.omnigalaxy.common.core.result.IResultCode;
 import com.omnigalaxy.common.core.result.Result;
 import com.omnigalaxy.common.core.result.ResultCodeEnum;
 import jakarta.validation.ConstraintViolationException;
@@ -39,7 +40,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(BizException.class)
     public Result<Void> handleBizException(BizException e) {
-        String msg = resolveMessage(e);
+        String msg = resolveMsg(e.getResultCode(), e.getArgs());
         log.warn(">>>> [核心底座] 业务异常已拦截，预期内（不影响系统稳定性）: {}", msg);
         return Result.failed(e.getResultCode().getCode(), msg);
     }
@@ -63,26 +64,20 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public Result<Void> handleException(Exception e) {
         log.error(">>>> [核心底座] 严重崩溃，未知系统异常，需立即排查", e);
-        return Result.failed(ResultCodeEnum.FAILED);
+        return Result.failed(ResultCodeEnum.FAILED.getCode(), resolveMsg(ResultCodeEnum.FAILED, null));
     }
 
     // -------------------------------------------------------------------------
 
     /**
-     * 反向桥接：以 "code.{enum.name()}" 为 key 查 MessageSource。
-     * 枚举实现了 name()（如 ResultCodeEnum）时走多语言解析；
-     * 裸字符串构造的 BizException（resultCode = FAILED）直接用 exception 自带 message。
+     * i18n 统一解析网关：以 "code.{enum.name()}" 为 key 查 MessageSource，
+     * key 缺失时降级使用枚举自带中文 msg 兜底，枚举本身无需改动。
      */
-    private String resolveMessage(BizException e) {
-        String enumName = e.getResultCode().getClass().isEnum()
-                ? ((Enum<?>) e.getResultCode()).name()
-                : null;
-        if (enumName != null) {
-            String key = "code." + enumName;
-            String resolved = messageSource.getMessage(
-                    key, e.getArgs(), e.getResultCode().getMsg(), LocaleContextHolder.getLocale());
-            return resolved;
+    private String resolveMsg(IResultCode resultCode, Object[] args) {
+        if (resultCode.getClass().isEnum()) {
+            String key = "code." + ((Enum<?>) resultCode).name();
+            return messageSource.getMessage(key, args, resultCode.getMsg(), LocaleContextHolder.getLocale());
         }
-        return e.getMessage();
+        return resultCode.getMsg();
     }
 }
