@@ -4,6 +4,11 @@ server:
 spring:
   application:
     name: platform-auth
+  datasource:
+    url: jdbc:mysql://${MYSQL_HOST:localhost}:${MYSQL_PORT:3306}/omni_galaxy_auth?characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    username: ${MYSQL_USER:root}
+    password: ${MYSQL_PASS:123456}
+    driver-class-name: com.mysql.cj.jdbc.Driver
   data:
     redis:
       host: ${REDIS_HOST:localhost}
@@ -34,6 +39,17 @@ knife4j:
         api-rule: package
         api-rule-resources:
           - com.omnigalaxy.platform.auth.controller
+
+mybatis-plus:
+  global-config:
+    db-config:
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+
+# 用户中心直连地址（Phase 2 本地联调；Phase 3 接入 Nacos 后留空即可由服务发现接管）
+platform-user:
+  base-url: ${PLATFORM_USER_BASE_URL:http://localhost:9200}
 
 omni-galaxy:
   security:

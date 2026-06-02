@@ -57,6 +57,22 @@
             <artifactId>platform-user-api</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <!-- Spring Cloud OpenFeign：Feign 客户端运行时（动态代理 + LoadBalancer） -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-openfeign</artifactId>
+        </dependency>
+        <!-- MyBatis-Plus 通用组件（元数据自动填充、分页） -->
+        <dependency>
+            <groupId>com.omnigalaxy</groupId>
+            <artifactId>common-mybatis</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <!-- MySQL 驱动：独立进程必须显式声明，防御重构原则 -->
+        <dependency>
+            <groupId>com.mysql</groupId>
+            <artifactId>mysql-connector-j</artifactId>
+        </dependency>
         <!-- Knife4j：接口文档（OpenAPI 3） -->
         <dependency>
             <groupId>com.github.xiaoymin</groupId>

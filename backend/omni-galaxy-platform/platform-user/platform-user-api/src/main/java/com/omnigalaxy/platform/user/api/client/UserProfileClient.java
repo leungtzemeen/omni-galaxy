@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
  * 用户中心内部 Feign 契约。
  * 仅供 platform-auth 等平台层服务调用，不对网关外暴露。
  */
-@FeignClient(name = "platform-user", path = "/inner/user")
+@FeignClient(name = "platform-user", url = "${platform-user.base-url:}", path = "/inner/user")
 public interface UserProfileClient {
 
     /**
