@@ -3,6 +3,7 @@ package com.omnigalaxy.platform.auth.service;
 import com.omnigalaxy.platform.auth.api.dto.LoginResponse;
 import com.omnigalaxy.platform.auth.dto.OtpLoginRequest;
 import com.omnigalaxy.platform.auth.dto.PasswordLoginRequest;
+import com.omnigalaxy.platform.auth.dto.PasswordRegisterRequest;
 
 public interface AuthService {
 
@@ -12,8 +13,9 @@ public interface AuthService {
      */
     LoginResponse loginByOtp(OtpLoginRequest request);
 
-    /**
-     * 密码登录（待 Phase 2 实现）。
-     */
+    /** 账密注册：手机号或邮箱 + 密码 + OTP 验证码。注册成功后自动签发 Token。 */
+    LoginResponse registerByPassword(PasswordRegisterRequest request);
+
+    /** 账密登录：手机号或邮箱 + 密码，含防爆破拦截。 */
     LoginResponse loginByPassword(PasswordLoginRequest request);
 }

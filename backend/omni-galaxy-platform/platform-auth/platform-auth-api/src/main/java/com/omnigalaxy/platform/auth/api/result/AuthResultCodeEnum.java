@@ -14,7 +14,13 @@ public enum AuthResultCodeEnum implements IResultCode {
 
     OTP_INVALID(400, "验证码错误或已过期，请重新获取"),
     OTP_SCENE_UNSUPPORTED(400, "不支持的验证码场景"),
-    PASSWORD_LOGIN_NOT_IMPL(501, "密码登录功能待 Phase 2 实现");
+
+    PASSWORD_WRONG(401, "账号或密码错误"),
+    ACCOUNT_LOCKED(429, "密码连续错误次数过多，账号已被临时锁定，请 15 分钟后重试"),
+    ACCOUNT_DISABLED(403, "账号已被禁用，请联系管理员"),
+
+    IDENTIFIER_ALREADY_REGISTERED(409, "该账号已注册，请直接登录"),
+    IDENTIFIER_OTP_REGISTERED(409, "该手机/邮箱已通过验证码注册，请使用验证码登录后在账户设置中绑定密码");
 
     private final int code;
     private final String msg;

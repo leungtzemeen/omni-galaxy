@@ -31,7 +31,7 @@ USE omni_galaxy_auth;
 -- identity_type 枚举（VARCHAR 便于无感扩容，无需 ALTER TABLE）：
 --   PHONE   手机号（E.164 格式）
 --   EMAIL   邮箱
---   PASSWORD 用户名 + 密码（identifier 存用户名）
+--   PASSWORD 手机号/邮箱 + 密码（identifier 存手机号(E.164)或邮箱地址）
 --   WECHAT  微信
 --   ALIPAY  支付宝
 --   APPLE   Apple ID（出海必备）

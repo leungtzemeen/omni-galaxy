@@ -25,12 +25,29 @@ public class UserCredentialServiceImpl implements UserCredentialService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public UserCredential findAnyByIdentifier(String identifier) {
+        return credentialMapper.selectOne(
+                new LambdaQueryWrapper<UserCredential>()
+                        .eq(UserCredential::getIdentifier, identifier)
+                        .last("LIMIT 1")
+        );
+    }
+
+    @Override
     @Transactional
     public void saveCredential(String identityType, String identifier, Long userId) {
+        saveCredential(identityType, identifier, userId, null);
+    }
+
+    @Override
+    @Transactional
+    public void saveCredential(String identityType, String identifier, Long userId, String hashedCredential) {
         UserCredential cred = new UserCredential();
         cred.setUserId(userId);
         cred.setIdentityType(identityType);
         cred.setIdentifier(identifier);
+        cred.setCredential(hashedCredential);
         cred.setStatus(0);
         credentialMapper.insert(cred);
     }

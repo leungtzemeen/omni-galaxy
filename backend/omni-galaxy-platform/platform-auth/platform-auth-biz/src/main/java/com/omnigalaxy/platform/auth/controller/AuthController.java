@@ -4,6 +4,7 @@ import com.omnigalaxy.common.core.result.Result;
 import com.omnigalaxy.platform.auth.api.dto.LoginResponse;
 import com.omnigalaxy.platform.auth.dto.OtpLoginRequest;
 import com.omnigalaxy.platform.auth.dto.PasswordLoginRequest;
+import com.omnigalaxy.platform.auth.dto.PasswordRegisterRequest;
 import com.omnigalaxy.platform.auth.dto.SendCodeRequest;
 import com.omnigalaxy.platform.auth.service.AuthCodeService;
 import com.omnigalaxy.platform.auth.service.AuthService;
@@ -40,8 +41,15 @@ public class AuthController {
         return Result.success(authService.loginByOtp(request));
     }
 
+    @Operation(summary = "账密注册",
+               description = "手机号或邮箱 + 密码 + OTP 验证码注册新账号。注册成功后自动登录并签发 Token。")
+    @PostMapping("/register/password")
+    public Result<LoginResponse> registerByPassword(@Valid @RequestBody PasswordRegisterRequest request) {
+        return Result.success(authService.registerByPassword(request));
+    }
+
     @Operation(summary = "密码登录",
-               description = "账号密码登录。待 Phase 2 实现：集成 BCrypt 校验、账号锁定策略等。")
+               description = "手机号或邮箱 + 密码登录。5 分钟内连续输错 5 次将锁定 15 分钟。")
     @PostMapping("/login/password")
     public Result<LoginResponse> loginByPassword(@Valid @RequestBody PasswordLoginRequest request) {
         return Result.success(authService.loginByPassword(request));

@@ -53,7 +53,13 @@ This file provides strict guidance and behavioral rules for Claude Code (claude.
 
 ---
 
-## 5. 常用开发命令集 (环境兼容: Git Bash)
+## 5. 数据库同步变更规约
+- **数据库**：涉及数据库表结构的变动、新字段追加、或任何索引/约束（如 uk_type_identifier）的创建与修改，必须在操作 Java 实体的同时，同步修改以下路径下对应的 SQL 初始化或变更脚本。
+- **脚本路径**：`D:\Projects\leungtzemeen\omni-galaxy\backend\sql\`
+- **要求**：严禁出现 Java 实体与 SQL 文件状态脱节的情况，确保数据库基线文件与物理表结构、Mapper 状态实时严格对齐。
+---
+
+## 6. 常用开发命令集 (环境兼容: Git Bash)
 
 ```bash
 # 清理并重新编译
