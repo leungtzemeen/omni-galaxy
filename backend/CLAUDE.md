@@ -24,7 +24,7 @@ This file provides strict guidance and behavioral rules for Claude Code (claude.
 - **Java 21 特性**：多利用 Java 21 虚拟线程特性，杜绝复杂的反射操作。方法重载或注入时确保形参名称明确，防止动态代理丢失参数名。
 - **命名规范**：类/接口大驼峰 (`PascalCase`)，方法/变量小驼峰 (`lowerCamelCase`)，全局常量大写加下划线 (`UPPER_SNAKE_CASE`)。
 - **单元测试特例**：测试方法名**允许并推荐使用下划线分段法**。格式统一为：`被测方法_测试场景_预期结果`（如 `methodName_scenario_expectedBehavior`）。严禁编写逻辑复杂的外部依赖夹具。
-
+- **注释规约**：在编写或重构核心业务代码时，请秉持“核心代码有迹可循”的原则，在关键步骤、条件分支或防御设计上，慷慨地留下清晰的、解释“为什么这么做（Why）”而非仅仅“做了什么（What）”的行内注释或方法级注释或类级注释。这不仅能让代码更具可读性，也有助于我们后续的高效对齐。
 ---
 
 ## 3. 项目架构与 Maven 防污染红线
