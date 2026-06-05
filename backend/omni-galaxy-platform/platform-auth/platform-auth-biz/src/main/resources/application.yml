@@ -51,6 +51,19 @@ mybatis-plus:
 platform-user:
   base-url: ${PLATFORM_USER_BASE_URL:http://localhost:9200}
 
+wechat:
+  web:
+    app-id: ${WECHAT_WEB_APP_ID:PLACEHOLDER}
+    app-secret: ${WECHAT_WEB_APP_SECRET:PLACEHOLDER}
+  mini:
+    app-id: ${WECHAT_MINI_APP_ID:PLACEHOLDER}
+    app-secret: ${WECHAT_MINI_APP_SECRET:PLACEHOLDER}
+
+alipay:
+  app-id: ${ALIPAY_APP_ID:PLACEHOLDER}
+  # RSA2 私钥（PKCS#8，Base64 编码，不含 Header/Footer 行）；生产通过环境变量注入
+  private-key: ${ALIPAY_PRIVATE_KEY:PLACEHOLDER}
+
 omni-galaxy:
   security:
     whitelist:
