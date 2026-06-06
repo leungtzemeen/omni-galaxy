@@ -158,7 +158,7 @@ public class AlipayStrategy implements SocialLoginStrategy {
         JsonNode resp = objectMapper.readTree(body)
                 .path("alipay_system_oauth_token_response");
 
-        if (isAlipayError(resp)) {
+        if (isOauthTokenError(resp)) {
             log.warn(">>>> [Auth-Alipay] OAuth token 业务失败 sub_code: {}",
                     resp.path("sub_code").asText("unknown"));
             throw new BizException(AuthResultCodeEnum.OAUTH_CODE_EXCHANGE_FAILED);
@@ -272,7 +272,24 @@ public class AlipayStrategy implements SocialLoginStrategy {
         return body;
     }
 
-    /** 支付宝成功响应 code 为 "10000"，节点缺失或其他 code 均视为业务失败。 */
+    /**
+     * 专用于 {@code alipay.system.oauth.token} 的错误判断。
+     *
+     * <p>该 API 成功时响应体<b>无 code 字段</b>，直接携带 access_token / user_id；
+     * 失败时才出现 code（如 "40002"）+ sub_code + msg。
+     * 因此"code 字段存在且不为 10000"才是错误信号，节点本身缺失也视为异常。
+     */
+    private boolean isOauthTokenError(JsonNode respNode) {
+        if (respNode.isMissingNode()) return true;
+        String code = respNode.path("code").asText("");
+        // 成功响应 code 缺失（空串）；失败响应 code 为具体错误码
+        return StringUtils.hasText(code) && !"10000".equals(code);
+    }
+
+    /**
+     * 适用于有 code 字段标志成功的 API（如 {@code alipay.user.getphone}）。
+     * 成功响应固定携带 {@code "code": "10000"}，节点缺失或其他 code 均视为业务失败。
+     */
     private boolean isAlipayError(JsonNode respNode) {
         return respNode.isMissingNode() || !"10000".equals(respNode.path("code").asText());
     }
