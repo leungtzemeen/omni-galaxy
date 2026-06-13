@@ -1,6 +1,7 @@
 package com.omnigalaxy.platform.auth.service.impl;
 
 import com.omnigalaxy.common.captcha.enums.OtpScene;
+import com.omnigalaxy.common.captcha.manager.HumanVerificationManager;
 import com.omnigalaxy.common.captcha.manager.OtpManager;
 import com.omnigalaxy.common.core.exception.BizException;
 import com.omnigalaxy.platform.auth.api.dto.LoginResponse;
@@ -11,6 +12,7 @@ import com.omnigalaxy.platform.auth.domain.UserCredential;
 import com.omnigalaxy.platform.auth.dto.OtpLoginRequest;
 import com.omnigalaxy.platform.auth.dto.PasswordLoginRequest;
 import com.omnigalaxy.platform.auth.dto.PasswordRegisterRequest;
+import com.omnigalaxy.platform.auth.exception.CaptchaChallengeException;
 import com.omnigalaxy.platform.auth.service.AuthService;
 import com.omnigalaxy.platform.auth.service.UserCredentialService;
 import com.omnigalaxy.platform.auth.util.JwtUtils;
@@ -38,6 +40,7 @@ public class AuthServiceImpl implements AuthService {
     private final AccountLifecycleManager accountLifecycleManager;
     private final PasswordEncoder         passwordEncoder;
     private final LoginRateLimiter        rateLimiter;
+    private final HumanVerificationManager humanVerificationManager;
 
     @Override
     public LoginResponse loginByOtp(OtpLoginRequest request) {
@@ -90,11 +93,22 @@ public class AuthServiceImpl implements AuthService {
 
         // 防爆破：命中封禁直接短路，不查库（避免被爆破放大为 DB 压力）
         rateLimiter.checkAndThrowIfBanned(identifier);
+        // 命中验证码连错冷却也直接短路，避免冷却期内继续消耗验证码挑战
+        rateLimiter.checkCaptchaCooldown(identifier);
+
+        // 失败计数达到软挑战阈值：要求先通过图形验证码，验证码失败不计入密码失败计数
+        if (rateLimiter.needsChallenge(identifier)) {
+            verifyHumanChallenge(identifier, request.getChallengeId(), request.getChallengeAnswer());
+        }
 
         UserCredential cred = credentialService.findByIdentity("PASSWORD", identifier);
         // 账号不存在与密码错误统一返回相同错误，防用户枚举攻击
         if (cred == null || !passwordEncoder.matches(request.getPassword(), cred.getCredential())) {
             rateLimiter.recordFailure(identifier);
+            if (rateLimiter.needsChallenge(identifier)) {
+                // 仍处于软挑战区间：响应体携带新挑战，前端无脑用最新值重试，杜绝过期 challengeId 死循环
+                throw new CaptchaChallengeException(AuthResultCodeEnum.PASSWORD_WRONG, humanVerificationManager.generateChallenge());
+            }
             throw new BizException(AuthResultCodeEnum.PASSWORD_WRONG);
         }
 
@@ -109,6 +123,22 @@ public class AuthServiceImpl implements AuthService {
     }
 
     // ── 私有工具 ──────────────────────────────────────────────────────────────
+
+    /**
+     * 校验软挑战图形验证码。verify 内部使用 Redis GETDEL 原子销毁，无论结果如何挑战立即失效，
+     * 因此失败时必须随响应携带一张全新挑战图，否则前端下一次提交会因 challengeId 已销毁而必然失败。
+     */
+    private void verifyHumanChallenge(String identifier, String challengeId, String challengeAnswer) {
+        if (challengeId == null || challengeAnswer == null) {
+            throw new CaptchaChallengeException(AuthResultCodeEnum.CAPTCHA_REQUIRED, humanVerificationManager.generateChallenge());
+        }
+        if (!humanVerificationManager.verify(challengeId, challengeAnswer)) {
+            boolean cooldownTriggered = rateLimiter.recordCaptchaFailure(identifier);
+            AuthResultCodeEnum code = cooldownTriggered ? AuthResultCodeEnum.CAPTCHA_FAIL_TOO_MANY : AuthResultCodeEnum.CAPTCHA_WRONG;
+            throw new CaptchaChallengeException(code, humanVerificationManager.generateChallenge());
+        }
+        rateLimiter.clearCaptchaFailure(identifier);
+    }
 
     private LoginResponse signToken(Long userId) {
         return new LoginResponse(

@@ -43,6 +43,11 @@ public class Result<T> {
         return new Result<>(code, msg, null);
     }
 
+    /** 失败但需携带数据场景（如风控异常下发新的验证码挑战），msg 须由调用方经 MessageSource 解析后传入 */
+    public static <T> Result<T> failed(int code, String msg, T data) {
+        return new Result<>(code, msg, data);
+    }
+
     // ======================== 工具方法 ========================
 
     public boolean isSuccess() {

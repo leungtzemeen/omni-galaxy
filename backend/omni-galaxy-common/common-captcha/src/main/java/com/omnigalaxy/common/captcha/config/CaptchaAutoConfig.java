@@ -1,5 +1,7 @@
 package com.omnigalaxy.common.captcha.config;
 
+import com.omnigalaxy.common.captcha.manager.EasyCaptchaVerificationManager;
+import com.omnigalaxy.common.captcha.manager.HumanVerificationManager;
 import com.omnigalaxy.common.captcha.manager.OtpManager;
 import com.omnigalaxy.common.captcha.manager.RedisOtpManager;
 import com.omnigalaxy.common.captcha.sender.CaptchaSender;
@@ -22,5 +24,11 @@ public class CaptchaAutoConfig {
     @ConditionalOnMissingBean
     public CaptchaSender captchaSender() {
         return new ConsoleCaptchaSender();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public HumanVerificationManager humanVerificationManager(StringRedisTemplate redisTemplate) {
+        return new EasyCaptchaVerificationManager(redisTemplate);
     }
 }

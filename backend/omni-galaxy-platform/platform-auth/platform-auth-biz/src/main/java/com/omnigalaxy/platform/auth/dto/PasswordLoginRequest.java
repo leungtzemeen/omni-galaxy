@@ -24,6 +24,12 @@ public class PasswordLoginRequest {
     @Schema(description = "密码", example = "Pass1234", requiredMode = Schema.RequiredMode.REQUIRED)
     private String password;
 
+    @Schema(description = "图形验证码挑战ID（仅在风控触发、上一次响应携带 challengeId 时需回传）")
+    private String challengeId;
+
+    @Schema(description = "图形验证码答案（仅在风控触发、上一次响应携带 challengeId 时需回传）")
+    private String challengeAnswer;
+
     public String getIdentifier() {
         return phone != null ? phone : email;
     }

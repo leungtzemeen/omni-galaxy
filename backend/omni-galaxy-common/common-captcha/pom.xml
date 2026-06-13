@@ -29,6 +29,17 @@
             <artifactId>common-core</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <!-- 图形验证码生成（人机验证策略实现之一，版本由根 POM 仲裁） -->
+        <dependency>
+            <groupId>com.github.whvcse</groupId>
+            <artifactId>easy-captcha</artifactId>
+        </dependency>
+        <!-- 单元测试：JUnit5 + Mockito -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
 </project>

@@ -19,6 +19,11 @@ public enum AuthResultCodeEnum implements IResultCode {
     ACCOUNT_LOCKED(429, "密码连续错误次数过多，账号已被临时锁定，请 15 分钟后重试"),
     ACCOUNT_DISABLED(403, "账号已被禁用，请联系管理员"),
 
+    // ── 密码登录软挑战（图形验证码） ──────────────────────────────────────────
+    CAPTCHA_REQUIRED(401, "需要先完成图形验证码校验"),
+    CAPTCHA_WRONG(400, "验证码错误，请重试"),
+    CAPTCHA_FAIL_TOO_MANY(429, "验证码连续错误次数过多，请稍后重试"),
+
     IDENTIFIER_ALREADY_REGISTERED(409, "该账号已注册，请直接登录"),
     IDENTIFIER_OTP_REGISTERED(409, "该手机/邮箱已通过验证码注册，请使用验证码登录后在账户设置中绑定密码"),
 
