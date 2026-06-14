@@ -1,0 +1,29 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: platform-gateway
+  data:
+    redis:
+      # 与 auth:token:blacklist:{jti} / auth:reset:{userId} 同一套 Redis 实例
+      host: ${REDIS_HOST:127.0.0.1}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      database: 0
+
+omni-galaxy:
+  # 与签发方（platform-auth-biz）共用同一份 JWT_SECRET，否则签名校验必然失败
+  jwt:
+    secret: ${JWT_SECRET}
+  gateway:
+    security:
+      # JwtVerificationFilter 放行名单：命中以下 Ant 路径的请求不做 JWT 校验。
+      # 注意：/auth/logout 不在此列——登出本身需要携带（尚未失效的）JWT 才能定位待拉黑的 jti。
+      # 已知技术债（Phase 2.5 范围外）：此名单需要随各业务域新增公开接口手动维护，
+      # 后续应探索基于路由元数据的声明式方案，避免每次新增公开接口都要改网关配置。
+      public-paths:
+        - /auth/login/**
+        - /auth/register/**
+        - /auth/code/send
+        - /auth/captcha/image

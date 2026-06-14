@@ -17,5 +17,25 @@
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-gateway</artifactId>
         </dependency>
+        <!-- 响应式 Redis：JwtVerificationFilter 黑名单/熔断时间戳校验依赖，严禁使用阻塞版 StringRedisTemplate -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis-reactive</artifactId>
+        </dependency>
+        <!-- 复用 JwtClaimsResolver：与 platform-auth-biz 共用同一套 JWT 解析与签名校验逻辑 -->
+        <dependency>
+            <groupId>com.omnigalaxy</groupId>
+            <artifactId>common-security</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
 </project>

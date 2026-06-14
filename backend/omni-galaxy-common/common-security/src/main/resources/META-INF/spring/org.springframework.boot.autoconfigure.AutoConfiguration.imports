@@ -1,1 +1,2 @@
 com.omnigalaxy.common.security.config.SecurityAutoConfig
+com.omnigalaxy.common.security.config.JwtClaimsResolverAutoConfig

@@ -18,4 +18,7 @@ public interface AuthService {
 
     /** 账密登录：手机号或邮箱 + 密码，含防爆破拦截。 */
     LoginResponse loginByPassword(PasswordLoginRequest request);
+
+    /** 退出登录：将传入的 Token 加入 Redis 黑名单，TTL 等于该 Token 的剩余有效期。 */
+    void logout(String token);
 }

@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -74,6 +75,19 @@ public class AuthController {
     @GetMapping("/captcha/image")
     public Result<CaptchaChallengeResponse> getCaptchaImage() {
         return Result.success(humanVerificationManager.generateChallenge());
+    }
+
+    @Operation(summary = "退出登录",
+               description = "将当前 Token 加入 Redis 黑名单，TTL 与 Token 剩余有效期一致，到期后自动清除。")
+    @PostMapping("/logout")
+    public Result<Void> logout(@RequestHeader("Authorization") String authorization) {
+        authService.logout(extractToken(authorization));
+        return Result.success();
+    }
+
+    /** Authorization Header 形如 "Bearer xxx.yyy.zzz"，剥离前缀拿到原始 JWT。 */
+    private String extractToken(String authorization) {
+        return authorization.startsWith("Bearer ") ? authorization.substring(7) : authorization;
     }
 
     /**

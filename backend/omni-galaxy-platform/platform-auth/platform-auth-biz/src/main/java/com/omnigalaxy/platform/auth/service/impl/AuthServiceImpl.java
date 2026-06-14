@@ -8,6 +8,7 @@ import com.omnigalaxy.platform.auth.api.dto.LoginResponse;
 import com.omnigalaxy.platform.auth.api.result.AuthResultCodeEnum;
 import com.omnigalaxy.platform.auth.component.AccountLifecycleManager;
 import com.omnigalaxy.platform.auth.component.LoginRateLimiter;
+import com.omnigalaxy.platform.auth.component.TokenBlacklistManager;
 import com.omnigalaxy.platform.auth.domain.UserCredential;
 import com.omnigalaxy.platform.auth.dto.OtpLoginRequest;
 import com.omnigalaxy.platform.auth.dto.PasswordLoginRequest;
@@ -41,6 +42,7 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordEncoder         passwordEncoder;
     private final LoginRateLimiter        rateLimiter;
     private final HumanVerificationManager humanVerificationManager;
+    private final TokenBlacklistManager   tokenBlacklistManager;
 
     @Override
     public LoginResponse loginByOtp(OtpLoginRequest request) {
@@ -120,6 +122,12 @@ public class AuthServiceImpl implements AuthService {
         rateLimiter.clearFailures(identifier);
         log.info("<<<< [Auth] 密码登录成功 userId: {}", cred.getUserId());
         return signToken(cred.getUserId());
+    }
+
+    @Override
+    public void logout(String token) {
+        log.info(">>>> [Auth] 登出请求 context: token={}****", token.substring(0, Math.min(8, token.length())));
+        tokenBlacklistManager.revoke(token);
     }
 
     // ── 私有工具 ──────────────────────────────────────────────────────────────

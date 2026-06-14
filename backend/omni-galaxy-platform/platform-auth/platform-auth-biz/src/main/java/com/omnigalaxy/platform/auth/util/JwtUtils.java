@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import javax.crypto.SecretKey;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * JWT 签发工具。
@@ -19,6 +20,7 @@ import java.util.List;
  * <ul>
  *   <li>{@code sub}   — userId（String）</li>
  *   <li>{@code roles} — 平台级角色列表（如 ROLE_USER、ROLE_SUPER_ADMIN）</li>
+ *   <li>{@code jti}   — 令牌唯一标识，登出时作为 Redis 黑名单 Key（auth:token:blacklist:{jti}）</li>
  *   <li>{@code iat}   — 签发时间</li>
  *   <li>{@code exp}   — 过期时间</li>
  * </ul>
@@ -35,6 +37,7 @@ public class JwtUtils {
         return Jwts.builder()
                 .subject(String.valueOf(userId))
                 .claim("roles", roles)
+                .id(UUID.randomUUID().toString())
                 .issuedAt(now)
                 .expiration(expiry)
                 .signWith(signKey())
