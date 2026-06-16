@@ -15,11 +15,10 @@ spring:
       port: ${REDIS_PORT:6379}
       database: 0
       timeout: 3000ms
-  # Feign 在 Phase 2 接入服务发现前禁用自动注册，避免找不到 Nacos 而启动失败
   cloud:
     nacos:
       discovery:
-        enabled: false
+        server-addr: ${NACOS_SERVER_ADDR:localhost:8848}
 
 springdoc:
   api-docs:
@@ -66,14 +65,16 @@ alipay:
 
 omni-galaxy:
   security:
+    # 仅豁免接口文档路径。/auth/** 不再整体豁免——网关已会在校验通过后透传
+    # X-User-Id/X-User-Roles，SecurityInterceptor 需要正常跑通才能让
+    # @RequiresLogin/@RequiresRoles 生效（如 /auth/social/bind/state）。
     whitelist:
-      - /auth/**
       - /doc.html
       - /v3/api-docs/**
       - /swagger-ui/**
       - /webjars/**
   jwt:
-    # ⚠️  开发占位密钥，生产环境必须通过 JWT_SECRET 环境变量注入
+    # 开发占位密钥，生产环境必须通过 JWT_SECRET 环境变量注入
     # 生成命令：openssl rand -base64 64
     secret: ${JWT_SECRET:ZGV2LW9ubGktc2VjcmV0LWtleS10aGF0LXNob3VsZC1iZS1jaGFuZ2Vk}
     expire-ms: 86400000

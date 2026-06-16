@@ -101,19 +101,24 @@ public class JwtVerificationFilter implements GlobalFilter, Ordered {
      * 两个时间戳统一按 epoch millis 比较，与 platform-auth-biz 写入时的单位保持一致。
      */
     private Mono<Boolean> checkRevocation(JwtClaimsResolver.ResolvedToken resolved) {
+        // 1. 【黑名单拦截线】：拿 jti 去查 Redis
+        // 如果是老 Token 没有 jti，直接放行 (false)；
+        // 如果有 jti，去 Redis 瞅一眼是否存在 "auth:token:blacklist:{jti}"
         Mono<Boolean> blacklisted = resolved.jti() == null
                 ? Mono.just(false)
                 : redisTemplate.hasKey(BLACKLIST_PREFIX + resolved.jti());
-
+        // 2. 【改密/风控全域熔断拦截线】：拿 userId 去查 Redis 里的最新熔断时间戳
         Mono<Boolean> resetBefore = redisTemplate.opsForValue()
-                .get(RESET_PREFIX + resolved.userId())
+                .get(RESET_PREFIX + resolved.userId())// 查 "auth:reset:{userId}"
                 .map(resetMillisStr -> {
-                    long resetMillis = Long.parseLong(resetMillisStr);
-                    Date issuedAt = resolved.issuedAt();
+                    long resetMillis = Long.parseLong(resetMillisStr);// 拿到全端熔断时间戳
+                    Date issuedAt = resolved.issuedAt();// 拿到当前 Token 的签发时间
+                    // 【核心比对】：如果当前 Token 的签发时间，早于系统要求的熔断时间，说明这个 Token 必须死！
                     return issuedAt != null && issuedAt.getTime() < resetMillis;
                 })
-                .defaultIfEmpty(false);
-
+                .defaultIfEmpty(false);// 如果 Redis 里压根没有这个 userId 的熔断记录，默认放行 (false)
+        // 3. 【双大闸汇聚】：利用 Mono.zip 并行发射这两道查询
+        // 只要中了【黑名单 (b)】或者中了【全端熔断 (r)】的任意一个，就判定这个 Token 已被撤销 (返回 true)
         return Mono.zip(blacklisted, resetBefore, (b, r) -> b || r);
     }
 

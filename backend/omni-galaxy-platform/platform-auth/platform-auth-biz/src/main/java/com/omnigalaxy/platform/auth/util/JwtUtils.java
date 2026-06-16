@@ -49,6 +49,8 @@ public class JwtUtils {
     }
 
     private SecretKey signKey() {
-        return Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtProperties.getSecret()));
+        // 与 JwtClaimsResolver（common-security）保持一致，两端必须使用相同的 Decoder，
+        // 否则签发密钥与校验密钥字节序列不同，签名校验必然失败。
+        return Keys.hmacShaKeyFor(Decoders.BASE64URL.decode(jwtProperties.getSecret()));
     }
 }

@@ -18,7 +18,7 @@ spring:
   cloud:
     nacos:
       discovery:
-        enabled: false
+        server-addr: ${NACOS_SERVER_ADDR:localhost:8848}
 
 mybatis-plus:
   global-config:

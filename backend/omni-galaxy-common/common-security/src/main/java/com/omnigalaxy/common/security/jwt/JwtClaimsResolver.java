@@ -50,7 +50,9 @@ public class JwtClaimsResolver {
     }
 
     private SecretKey signKey() {
-        return Keys.hmacShaKeyFor(Decoders.BASE64.decode(properties.getSecret()));
+        // JWT 规范（RFC 7519）使用 Base64URL 编码；标准 Base64 不认识 '-' 和 '_'，
+        // 而 HMAC-SHA256 签名的 Base64URL 结果必然含这两个字符，因此必须用 BASE64URL。
+        return Keys.hmacShaKeyFor(Decoders.BASE64URL.decode(properties.getSecret()));
     }
 
     /**

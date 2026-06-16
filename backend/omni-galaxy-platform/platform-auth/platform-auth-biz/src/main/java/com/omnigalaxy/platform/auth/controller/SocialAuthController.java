@@ -1,6 +1,8 @@
 package com.omnigalaxy.platform.auth.controller;
 
+import com.omnigalaxy.common.core.context.UserContext;
 import com.omnigalaxy.common.core.result.Result;
+import com.omnigalaxy.common.security.annotation.RequiresLogin;
 import com.omnigalaxy.platform.auth.api.dto.LoginResponse;
 import com.omnigalaxy.platform.auth.api.dto.SocialLoginResponse;
 import com.omnigalaxy.platform.auth.dto.BindSocialRequest;
@@ -14,7 +16,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -90,11 +91,12 @@ public class SocialAuthController {
                description = "已登录用户发起社交账号绑定前调用。state 内绑定当前 userId，" +
                              "OAuth 回调时校验以防 OAuth 劫持绑定攻击（Binding CSRF）。" +
                              "【网关必配】userId 维度 Rate Limiting。")
+    @RequiresLogin
     @GetMapping("/bind/state")
-    public Result<String> getBindState(
-            @Parameter(description = "渠道标识") @RequestParam String provider,
-            @Parameter(description = "当前登录用户 ID，由网关从 JWT 解析后透传", required = true)
-            @RequestHeader("X-User-Id") Long currentUserId) {
+    public Result<String> getBindState(@Parameter(description = "渠道标识") @RequestParam String provider) {
+        // currentUserId 由 SecurityInterceptor 在 preHandle 阶段从网关透传的
+        // X-User-Id Header 解析并写入 UserContext；@RequiresLogin 已保证此处非空。
+        Long currentUserId = UserContext.getLoginUser().userId();
         return Result.success(socialAuthService.generateBindState(provider, currentUserId));
     }
 

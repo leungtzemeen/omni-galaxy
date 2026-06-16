@@ -28,6 +28,16 @@
             <artifactId>common-security</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <!-- Nacos 服务注册与发现（版本由根 POM 的 spring-cloud-alibaba-dependencies 仲裁） -->
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
+        </dependency>
+        <!-- 路由 uri 使用 lb:// 协议时，由 LoadBalancer 结合 Nacos 解析具体实例，缺失会导致路由 503 -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-loadbalancer</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
