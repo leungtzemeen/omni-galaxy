@@ -2,14 +2,12 @@ package com.omnigalaxy.platform.auth.controller;
 
 import com.omnigalaxy.common.captcha.dto.CaptchaChallengeResponse;
 import com.omnigalaxy.common.captcha.manager.HumanVerificationManager;
-import com.omnigalaxy.common.core.result.IResultCode;
 import com.omnigalaxy.common.core.result.Result;
 import com.omnigalaxy.platform.auth.api.dto.LoginResponse;
 import com.omnigalaxy.platform.auth.dto.OtpLoginRequest;
 import com.omnigalaxy.platform.auth.dto.PasswordLoginRequest;
 import com.omnigalaxy.platform.auth.dto.PasswordRegisterRequest;
 import com.omnigalaxy.platform.auth.dto.SendCodeRequest;
-import com.omnigalaxy.platform.auth.exception.CaptchaChallengeException;
 import com.omnigalaxy.platform.auth.service.AuthCodeService;
 import com.omnigalaxy.platform.auth.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -17,9 +15,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.MessageSource;
-import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -37,7 +32,6 @@ public class AuthController {
     private final AuthCodeService          authCodeService;
     private final AuthService              authService;
     private final HumanVerificationManager humanVerificationManager;
-    private final MessageSource            messageSource;
 
     @Operation(summary = "发送验证码",
                description = "支持 PHONE / EMAIL；1 分钟冷却，5 分钟有效期。开发模式下验证码打印至日志。")
@@ -90,22 +84,4 @@ public class AuthController {
         return authorization.startsWith("Bearer ") ? authorization.substring(7) : authorization;
     }
 
-    /**
-     * 局部异常处理器：仅拦截本控制器抛出的 {@link CaptchaChallengeException}，
-     * 将"下一次可用挑战"随错误响应一并下发，不影响全局 GlobalExceptionHandler 对其他异常的处理契约。
-     */
-    @ExceptionHandler(CaptchaChallengeException.class)
-    public Result<CaptchaChallengeResponse> handleCaptchaChallenge(CaptchaChallengeException e) {
-        String msg = resolveMsg(e.getResultCode(), e.getArgs());
-        log.warn(">>>> [Auth] 密码登录验证码风控拦截: {}", msg);
-        return Result.failed(e.getResultCode().getCode(), msg, e.getNextChallenge());
-    }
-
-    private String resolveMsg(IResultCode resultCode, Object[] args) {
-        if (resultCode.getClass().isEnum()) {
-            String key = "code." + ((Enum<?>) resultCode).name();
-            return messageSource.getMessage(key, args, resultCode.getMsg(), LocaleContextHolder.getLocale());
-        }
-        return resultCode.getMsg();
-    }
 }

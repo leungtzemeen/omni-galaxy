@@ -1,14 +1,12 @@
 package com.omnigalaxy.common.core.handler;
 
 import com.omnigalaxy.common.core.exception.BizException;
-import com.omnigalaxy.common.core.result.IResultCode;
 import com.omnigalaxy.common.core.result.Result;
 import com.omnigalaxy.common.core.result.ResultCodeEnum;
+import com.omnigalaxy.common.core.result.ResultCodeMessageResolver;
 import jakarta.validation.ConstraintViolationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.MessageSource;
-import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -38,11 +36,11 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class GlobalExceptionHandler {
 
-    private final MessageSource messageSource;
+    private final ResultCodeMessageResolver resultCodeMessageResolver;
 
     @ExceptionHandler(BizException.class)
     public Result<Void> handleBizException(BizException e) {
-        String msg = resolveMsg(e.getResultCode(), e.getArgs());
+        String msg = resultCodeMessageResolver.resolve(e.getResultCode(), e.getArgs());
         log.warn(">>>> [核心底座] 业务异常已拦截，预期内（不影响系统稳定性）: {}", msg);
         return Result.failed(e.getResultCode().getCode(), msg);
     }
@@ -71,20 +69,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public Result<Void> handleException(Exception e) {
         log.error(">>>> [核心底座] 严重崩溃，未知系统异常，需立即排查", e);
-        return Result.failed(ResultCodeEnum.FAILED.getCode(), resolveMsg(ResultCodeEnum.FAILED, null));
+        return Result.failed(ResultCodeEnum.FAILED.getCode(), resultCodeMessageResolver.resolve(ResultCodeEnum.FAILED, null));
     }
 
-    // -------------------------------------------------------------------------
-
-    /**
-     * i18n 统一解析网关：以 "code.{enum.name()}" 为 key 查 MessageSource，
-     * key 缺失时降级使用枚举自带中文 msg 兜底，枚举本身无需改动。
-     */
-    private String resolveMsg(IResultCode resultCode, Object[] args) {
-        if (resultCode.getClass().isEnum()) {
-            String key = "code." + ((Enum<?>) resultCode).name();
-            return messageSource.getMessage(key, args, resultCode.getMsg(), LocaleContextHolder.getLocale());
-        }
-        return resultCode.getMsg();
-    }
 }

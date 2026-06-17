@@ -9,6 +9,7 @@ import com.omnigalaxy.platform.auth.api.result.AuthResultCodeEnum;
 import com.omnigalaxy.platform.auth.component.AccountLifecycleManager;
 import com.omnigalaxy.platform.auth.component.LoginRateLimiter;
 import com.omnigalaxy.platform.auth.component.TokenBlacklistManager;
+import com.omnigalaxy.platform.auth.component.TokenIssuer;
 import com.omnigalaxy.platform.auth.domain.UserCredential;
 import com.omnigalaxy.platform.auth.dto.OtpLoginRequest;
 import com.omnigalaxy.platform.auth.dto.PasswordLoginRequest;
@@ -16,13 +17,10 @@ import com.omnigalaxy.platform.auth.dto.PasswordRegisterRequest;
 import com.omnigalaxy.platform.auth.exception.CaptchaChallengeException;
 import com.omnigalaxy.platform.auth.service.AuthService;
 import com.omnigalaxy.platform.auth.service.UserCredentialService;
-import com.omnigalaxy.platform.auth.util.JwtUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 /**
  * 认证服务实现：负责协议层校验（OTP 验签、BCrypt 比对、速率限制）与令牌签发。
@@ -36,7 +34,7 @@ import java.util.List;
 public class AuthServiceImpl implements AuthService {
 
     private final OtpManager              otpManager;
-    private final JwtUtils                jwtUtils;
+    private final TokenIssuer             tokenIssuer;
     private final UserCredentialService   credentialService;
     private final AccountLifecycleManager accountLifecycleManager;
     private final PasswordEncoder         passwordEncoder;
@@ -59,13 +57,13 @@ public class AuthServiceImpl implements AuthService {
         UserCredential cred = credentialService.findByIdentity(identityType, identifier);
         if (cred != null) {
             log.info("<<<< [Auth] 老用户 OTP 登录成功 userId: {}", cred.getUserId());
-            return signToken(cred.getUserId());
+            return tokenIssuer.issue(cred.getUserId());
         }
 
         // 慢速路径：新用户 → 委托 Manager 完成账户发现/合并/注册（含分布式锁 + 自愈）
         Long userId = accountLifecycleManager.findOrMergeAccount(identityType, identifier);
         log.info("<<<< [Auth] 新用户 OTP 登注成功 identityType: {} userId: {}", identityType, userId);
-        return signToken(userId);
+        return tokenIssuer.issue(userId);
     }
 
     @Override
@@ -84,7 +82,7 @@ public class AuthServiceImpl implements AuthService {
                 identityType, identifier, passwordEncoder.encode(request.getPassword()));
 
         log.info("<<<< [Auth] 账密注册成功 identityType: {} userId: {}", identityType, userId);
-        return signToken(userId);
+        return tokenIssuer.issue(userId);
     }
 
     @Override
@@ -121,7 +119,7 @@ public class AuthServiceImpl implements AuthService {
 
         rateLimiter.clearFailures(identifier);
         log.info("<<<< [Auth] 密码登录成功 userId: {}", cred.getUserId());
-        return signToken(cred.getUserId());
+        return tokenIssuer.issue(cred.getUserId());
     }
 
     @Override
@@ -146,14 +144,6 @@ public class AuthServiceImpl implements AuthService {
             throw new CaptchaChallengeException(code, humanVerificationManager.generateChallenge());
         }
         rateLimiter.clearCaptchaFailure(identifier);
-    }
-
-    private LoginResponse signToken(Long userId) {
-        return new LoginResponse(
-                jwtUtils.generateToken(userId, List.of("ROLE_USER")),
-                jwtUtils.getExpireSeconds(),
-                userId
-        );
     }
 
     private String mask(String s) {

@@ -8,6 +8,7 @@ import com.omnigalaxy.platform.auth.api.dto.SocialLoginResponse;
 import com.omnigalaxy.platform.auth.api.result.AuthResultCodeEnum;
 import com.omnigalaxy.platform.auth.component.AccountLifecycleManager;
 import com.omnigalaxy.platform.auth.component.OAuthStateManager;
+import com.omnigalaxy.platform.auth.component.TokenIssuer;
 import com.omnigalaxy.platform.auth.component.SocialLoginResult;
 import com.omnigalaxy.platform.auth.domain.UserCredential;
 import com.omnigalaxy.platform.auth.dto.BindSocialRequest;
@@ -16,7 +17,6 @@ import com.omnigalaxy.platform.auth.oauth.SocialIdentity;
 import com.omnigalaxy.platform.auth.oauth.SocialLoginStrategy;
 import com.omnigalaxy.platform.auth.service.SocialAuthService;
 import com.omnigalaxy.platform.auth.service.UserCredentialService;
-import com.omnigalaxy.platform.auth.util.JwtUtils;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -48,7 +48,7 @@ public class SocialAuthServiceImpl implements SocialAuthService {
     private final AccountLifecycleManager   accountLifecycleManager;
     private final UserCredentialService     credentialService;
     private final OtpManager               otpManager;
-    private final JwtUtils                 jwtUtils;
+    private final TokenIssuer              tokenIssuer;
 
     /** 按 identityType（大写）索引策略，启动时构建一次，运行期只读 */
     private Map<String, SocialLoginStrategy> strategies;
@@ -175,7 +175,7 @@ public class SocialAuthServiceImpl implements SocialAuthService {
         Long userId = accountLifecycleManager.consumeBindTicket(request.getBindTicket(), identifier);
 
         log.info("<<<< [Auth-Social] OTP 绑定成功，签发 Token userId: {}", userId);
-        return signToken(userId);
+        return tokenIssuer.issue(userId);
     }
 
     // =========================================================================
@@ -200,14 +200,7 @@ public class SocialAuthServiceImpl implements SocialAuthService {
             return SocialLoginResponse.needBind(result.bindTicket(), result.maskedIdentifier());
         }
         log.info("<<<< [Auth-Social] 社交登录成功 provider: {} userId: {}", provider, result.userId());
-        return SocialLoginResponse.success(signToken(result.userId()));
+        return SocialLoginResponse.success(tokenIssuer.issue(result.userId()));
     }
 
-    private LoginResponse signToken(Long userId) {
-        return new LoginResponse(
-                jwtUtils.generateToken(userId, List.of("ROLE_USER")),
-                jwtUtils.getExpireSeconds(),
-                userId
-        );
-    }
 }

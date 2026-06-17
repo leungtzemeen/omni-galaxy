@@ -6,11 +6,12 @@ import com.omnigalaxy.common.captcha.manager.OtpManager;
 import com.omnigalaxy.platform.auth.api.result.AuthResultCodeEnum;
 import com.omnigalaxy.platform.auth.component.AccountLifecycleManager;
 import com.omnigalaxy.platform.auth.component.LoginRateLimiter;
+import com.omnigalaxy.platform.auth.component.TokenBlacklistManager;
+import com.omnigalaxy.platform.auth.component.TokenIssuer;
 import com.omnigalaxy.platform.auth.domain.UserCredential;
 import com.omnigalaxy.platform.auth.dto.PasswordLoginRequest;
 import com.omnigalaxy.platform.auth.exception.CaptchaChallengeException;
 import com.omnigalaxy.platform.auth.service.UserCredentialService;
-import com.omnigalaxy.platform.auth.util.JwtUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,20 +35,22 @@ class AuthServiceImplTest {
 
     private static final String IDENTIFIER = "13800000000";
 
-    @Mock private OtpManager otpManager;
-    @Mock private JwtUtils jwtUtils;
-    @Mock private UserCredentialService credentialService;
+    @Mock private OtpManager              otpManager;
+    @Mock private TokenIssuer             tokenIssuer;
+    @Mock private UserCredentialService   credentialService;
     @Mock private AccountLifecycleManager accountLifecycleManager;
-    @Mock private PasswordEncoder passwordEncoder;
-    @Mock private LoginRateLimiter rateLimiter;
+    @Mock private PasswordEncoder         passwordEncoder;
+    @Mock private LoginRateLimiter        rateLimiter;
     @Mock private HumanVerificationManager humanVerificationManager;
+    @Mock private TokenBlacklistManager   tokenBlacklistManager;
 
     private AuthServiceImpl authService;
 
     @BeforeEach
     void setUp() {
-        authService = new AuthServiceImpl(otpManager, jwtUtils, credentialService,
-                accountLifecycleManager, passwordEncoder, rateLimiter, humanVerificationManager);
+        authService = new AuthServiceImpl(otpManager, tokenIssuer, credentialService,
+                accountLifecycleManager, passwordEncoder, rateLimiter, humanVerificationManager,
+                tokenBlacklistManager);
     }
 
     private PasswordLoginRequest buildRequest(String challengeId, String challengeAnswer) {
