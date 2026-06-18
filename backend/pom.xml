@@ -27,6 +27,7 @@
         <mapstruct.version>1.6.3</mapstruct.version>
         <knife4j.version>4.5.0</knife4j.version>
         <jjwt.version>0.12.6</jjwt.version>
+        <aliyun-dysms.version>2.0.24</aliyun-dysms.version>
     </properties>
 
     <!-- 统管大单仓的四大领域目录 -->
@@ -97,6 +98,12 @@
                 <artifactId>jjwt-jackson</artifactId>
                 <version>${jjwt.version}</version>
                 <scope>runtime</scope>
+            </dependency>
+            <!-- 阿里云短信服务 SDK（SMS 渠道验证码发送） -->
+            <dependency>
+                <groupId>com.aliyun</groupId>
+                <artifactId>alibabacloud-dysmsapi20170525</artifactId>
+                <version>${aliyun-dysms.version}</version>
             </dependency>
             <!-- 图形验证码生成（人机验证策略实现之一） -->
             <dependency>

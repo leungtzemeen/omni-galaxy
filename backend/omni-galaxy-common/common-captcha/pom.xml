@@ -34,6 +34,18 @@
             <groupId>com.github.whvcse</groupId>
             <artifactId>easy-captcha</artifactId>
         </dependency>
+        <!-- 阿里云 SMS SDK（optional：仅启用短信渠道时引入） -->
+        <dependency>
+            <groupId>com.aliyun</groupId>
+            <artifactId>alibabacloud-dysmsapi20170525</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <!-- Spring Mail（optional：仅启用邮件渠道时引入） -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-mail</artifactId>
+            <optional>true</optional>
+        </dependency>
         <!-- 单元测试：JUnit5 + Mockito -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

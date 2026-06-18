@@ -23,7 +23,7 @@ public class AuthCodeServiceImpl implements AuthCodeService {
     public void sendCode(SendCodeRequest request) {
         OtpScene scene = parseScene(request.getScene());
         String code = otpManager.generateAndStore(scene, request.getIdentityType(), request.getIdentifier());
-        captchaSender.send(request.getIdentifier(), code);
+        captchaSender.send(request.getIdentityType(), request.getIdentifier(), code);
         log.info(">>>> [AuthCode] 验证码已发送 identityType: {} identifier: {}",
                  request.getIdentityType(), request.getIdentifier());
     }
