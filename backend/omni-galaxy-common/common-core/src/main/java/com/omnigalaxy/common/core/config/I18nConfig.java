@@ -1,5 +1,6 @@
 package com.omnigalaxy.common.core.config;
 
+import com.omnigalaxy.common.core.result.ResultCodeMessageResolver;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
@@ -39,6 +40,11 @@ public class I18nConfig {
         LocalValidatorFactoryBean factory = new LocalValidatorFactoryBean();
         factory.setValidationMessageSource(messageSource);
         return factory;
+    }
+
+    @Bean
+    public ResultCodeMessageResolver resultCodeMessageResolver(MessageSource messageSource) {
+        return new ResultCodeMessageResolver(messageSource);
     }
 
 }

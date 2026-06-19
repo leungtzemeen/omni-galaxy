@@ -3,7 +3,6 @@ package com.omnigalaxy.common.core.result;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.stereotype.Component;
 
 /**
  * i18n 状态码消息解析器。
@@ -11,8 +10,9 @@ import org.springframework.stereotype.Component;
  * <p>统一收口"code.{枚举名}"→MessageSource 的查找逻辑，
  * key 缺失时以枚举自带中文 msg 兜底，兜底链由此处单点维护。
  * GlobalExceptionHandler、局部 @ExceptionHandler 均注入此 Bean，杜绝重复实现。
+ * Bean 由 {@link com.omnigalaxy.common.core.config.I18nConfig} 注册（@AutoConfiguration），
+ * 而非 @Component，确保库模块在非扫描场景下也能正确装配。
  */
-@Component
 @RequiredArgsConstructor
 public class ResultCodeMessageResolver {
 
