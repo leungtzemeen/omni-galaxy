@@ -34,6 +34,12 @@ public enum AuthResultCodeEnum implements IResultCode {
     MULTIPLE_ACCOUNT_CONFLICT(409, "当前社交账号关联的凭证分属多个不同账号，无法自动合并，请联系客服处理"),
     ACCOUNT_NOT_FOUND(404, "账号不存在"),
 
+    // ── 密码变更 ──────────────────────────────────────────────────────────────
+    /** 账号通过 OTP 注册，从未设置过密码，无法执行"修改"动作（应走账密注册绑定流程）。 */
+    PASSWORD_NOT_SET(400, "当前账号未设置密码，请先通过账密注册功能绑定密码"),
+    /** OTP 已通过校验，但所提供的手机/邮箱与当前登录账号不属同一凭证。 */
+    IDENTIFIER_NOT_BELONG(403, "所提供的手机/邮箱与当前账号不符，请确认后重试"),
+
     // ── OAuth state / CSRF ────────────────────────────────────────────────────
     INVALID_OAUTH_STATE(400, "OAuth state 无效或已过期，请重新发起授权"),
     OAUTH_CODE_EXCHANGE_FAILED(502, "与第三方平台通信失败，请稍后重试");

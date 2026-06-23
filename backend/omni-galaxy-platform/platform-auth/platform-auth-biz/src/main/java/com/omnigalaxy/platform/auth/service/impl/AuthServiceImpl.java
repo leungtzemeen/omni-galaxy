@@ -7,10 +7,12 @@ import com.omnigalaxy.common.core.exception.BizException;
 import com.omnigalaxy.platform.auth.api.dto.LoginResponse;
 import com.omnigalaxy.platform.auth.api.result.AuthResultCodeEnum;
 import com.omnigalaxy.platform.auth.component.AccountLifecycleManager;
+import com.omnigalaxy.platform.auth.component.GlobalCircuitBreakerManager;
 import com.omnigalaxy.platform.auth.component.LoginRateLimiter;
 import com.omnigalaxy.platform.auth.component.TokenBlacklistManager;
 import com.omnigalaxy.platform.auth.component.TokenIssuer;
 import com.omnigalaxy.platform.auth.domain.UserCredential;
+import com.omnigalaxy.platform.auth.dto.ChangePasswordRequest;
 import com.omnigalaxy.platform.auth.dto.OtpLoginRequest;
 import com.omnigalaxy.platform.auth.dto.PasswordLoginRequest;
 import com.omnigalaxy.platform.auth.dto.PasswordRegisterRequest;
@@ -33,14 +35,15 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
 
-    private final OtpManager              otpManager;
-    private final TokenIssuer             tokenIssuer;
-    private final UserCredentialService   credentialService;
-    private final AccountLifecycleManager accountLifecycleManager;
-    private final PasswordEncoder         passwordEncoder;
-    private final LoginRateLimiter        rateLimiter;
-    private final HumanVerificationManager humanVerificationManager;
-    private final TokenBlacklistManager   tokenBlacklistManager;
+    private final OtpManager                otpManager;
+    private final TokenIssuer               tokenIssuer;
+    private final UserCredentialService     credentialService;
+    private final AccountLifecycleManager   accountLifecycleManager;
+    private final PasswordEncoder           passwordEncoder;
+    private final LoginRateLimiter          rateLimiter;
+    private final HumanVerificationManager  humanVerificationManager;
+    private final TokenBlacklistManager     tokenBlacklistManager;
+    private final GlobalCircuitBreakerManager circuitBreakerManager;
 
     @Override
     public LoginResponse loginByOtp(OtpLoginRequest request) {
@@ -126,6 +129,41 @@ public class AuthServiceImpl implements AuthService {
     public void logout(String token) {
         log.info(">>>> [Auth] 登出请求 context: token={}****", token.substring(0, Math.min(8, token.length())));
         tokenBlacklistManager.revoke(token);
+    }
+
+    @Override
+    public void changePassword(Long userId, ChangePasswordRequest request) {
+        String identifier   = request.getIdentifier();
+        String identityType = request.getIdentityType();
+
+        log.info(">>>> [Auth] 修改密码请求 userId: {} identityType: {} identifier: {}", userId, identityType, mask(identifier));
+
+        // 1. OTP 验证：确认请求方对该手机/邮箱拥有控制权
+        if (!otpManager.verify(OtpScene.RESET_PWD, identityType, identifier, request.getOtpCode())) {
+            throw new BizException(AuthResultCodeEnum.OTP_INVALID);
+        }
+
+        // 2. 归属校验：确认该手机/邮箱凭证确实属于当前登录用户，防止用他人 OTP 串改账号
+        UserCredential identifierCred = credentialService.findByIdentity(identityType, identifier);
+        if (identifierCred == null || !userId.equals(identifierCred.getUserId())) {
+            log.warn(">>>> [Auth] 修改密码归属校验失败，identifier 不属于当前账号（处理策略：403）userId: {} identifier: {}",
+                    userId, mask(identifier));
+            throw new BizException(AuthResultCodeEnum.IDENTIFIER_NOT_BELONG);
+        }
+
+        // 3. 确认该账号已有 PASSWORD 凭证，无则说明是纯 OTP 账号，应走账密注册绑定流程
+        UserCredential passwordCred = credentialService.findByUserIdAndType(userId, "PASSWORD");
+        if (passwordCred == null) {
+            throw new BizException(AuthResultCodeEnum.PASSWORD_NOT_SET);
+        }
+
+        // 4. 更新密码哈希
+        credentialService.updatePassword(userId, passwordEncoder.encode(request.getNewPassword()));
+
+        // 5. 全域熔断：使该用户所有存量 Token 立即失效，防止旧 Token 继续使用旧密码的会话
+        circuitBreakerManager.revokeAllTokens(userId);
+
+        log.info("<<<< [Auth] 修改密码成功，存量 Token 已全部熔断 userId: {}", userId);
     }
 
     // ── 私有工具 ──────────────────────────────────────────────────────────────

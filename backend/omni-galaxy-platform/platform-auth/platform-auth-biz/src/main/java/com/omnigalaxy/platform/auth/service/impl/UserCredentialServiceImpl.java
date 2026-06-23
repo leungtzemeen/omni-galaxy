@@ -1,6 +1,7 @@
 package com.omnigalaxy.platform.auth.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.omnigalaxy.platform.auth.domain.UserCredential;
 import com.omnigalaxy.platform.auth.mapper.UserCredentialMapper;
 import com.omnigalaxy.platform.auth.service.UserCredentialService;
@@ -31,6 +32,27 @@ public class UserCredentialServiceImpl implements UserCredentialService {
                 new LambdaQueryWrapper<UserCredential>()
                         .eq(UserCredential::getIdentifier, identifier)
                         .last("LIMIT 1")
+        );
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public UserCredential findByUserIdAndType(Long userId, String identityType) {
+        return credentialMapper.selectOne(
+                new LambdaQueryWrapper<UserCredential>()
+                        .eq(UserCredential::getUserId, userId)
+                        .eq(UserCredential::getIdentityType, identityType)
+        );
+    }
+
+    @Override
+    @Transactional
+    public void updatePassword(Long userId, String hashedPassword) {
+        credentialMapper.update(
+                new LambdaUpdateWrapper<UserCredential>()
+                        .eq(UserCredential::getUserId, userId)
+                        .eq(UserCredential::getIdentityType, "PASSWORD")
+                        .set(UserCredential::getCredential, hashedPassword)
         );
     }
 

@@ -4,6 +4,7 @@ import com.omnigalaxy.common.captcha.dto.CaptchaChallengeResponse;
 import com.omnigalaxy.common.captcha.manager.HumanVerificationManager;
 import com.omnigalaxy.common.core.result.Result;
 import com.omnigalaxy.platform.auth.api.dto.LoginResponse;
+import com.omnigalaxy.platform.auth.dto.ChangePasswordRequest;
 import com.omnigalaxy.platform.auth.dto.OtpLoginRequest;
 import com.omnigalaxy.platform.auth.dto.PasswordLoginRequest;
 import com.omnigalaxy.platform.auth.dto.PasswordRegisterRequest;
@@ -76,6 +77,18 @@ public class AuthController {
     @PostMapping("/logout")
     public Result<Void> logout(@RequestHeader("Authorization") String authorization) {
         authService.logout(extractToken(authorization));
+        return Result.success();
+    }
+
+    @Operation(summary = "修改密码",
+               description = "OTP 验证码证明手机/邮箱归属权，通过后更新密码并触发全域 Token 熔断（所有存量登录态立即失效）。" +
+                             "调用前须先通过 /auth/code/send 向手机/邮箱发送场景为 RESET_PWD 的验证码。" +
+                             "纯 OTP 账号（从未设置过密码）请改用账密注册接口绑定密码。")
+    @PostMapping("/password/change")
+    public Result<Void> changePassword(
+            @RequestHeader("X-User-Id") Long userId,
+            @Valid @RequestBody ChangePasswordRequest request) {
+        authService.changePassword(userId, request);
         return Result.success();
     }
 
